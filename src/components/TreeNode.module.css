@@ -1,0 +1,12 @@
+.treeNodeContainer {
+  padding-left: 2%;
+}
+.treeNodeElement {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.childDisplay {
+  display: flex;
+  align-items: center;
+}
