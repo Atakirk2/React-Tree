@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import classes from "./TreeNode.module.css";
+import useKeyPress from "../Hooks/use-keyPress";
 import {
   MdKeyboardArrowRight,
   MdKeyboardArrowDown,
@@ -16,6 +17,40 @@ export default function TreeNode(props) {
   const parentSelectedChilds = props.parentSelectedChilds;
   const rootIDs = [1, 10];
   const [isRoot, setIsRoot] = useState(rootIDs.includes(id) ? true : false);
+  // keyboard traversing part
+  const [cursor, setCursor] = useState(0);
+  const downPress = useKeyPress("ArrowDown");
+  const upPress = useKeyPress("ArrowUp");
+  const [hovered, setHovered] = useState(false);
+  const enterPress = useKeyPress("Enter");
+
+  useEffect(() => {
+    if (downPress) {
+      console.log(cursor);
+      setCursor((prevState) => (prevState < 13 ? prevState + 1 : prevState));
+    }
+  }, [downPress]);
+
+  useEffect(() => {
+    if (upPress) {
+      console.log(cursor);
+      setCursor((prevState) => (prevState > 0 ? prevState - 1 : prevState));
+    }
+  }, [upPress]);
+
+  useEffect(() => {
+    if (cursor === id) {
+      setHovered(true);
+    } else {
+      setHovered(false);
+    }
+  }, [downPress,upPress]);
+
+  useEffect(() => {
+    if (enterPress && cursor === id) {
+      handleIsActive();
+    }
+  }, [enterPress]);
 
   function handleIsActive() {
     setIsActive((prev) => !prev);
@@ -35,7 +70,7 @@ export default function TreeNode(props) {
   }
 
   return (
-    <div className={classes.treeNodeContainer}>
+    <div className={`${classes.treeNodeContainer}`}>
       <div className={classes.treeNodeElement}>
         <div onClick={handleIsActive}>
           {isActive ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
@@ -50,7 +85,9 @@ export default function TreeNode(props) {
           ></input>
         )}
         <div onClick={handleIsActive}>
-          <li>{props.node.name}</li>
+          <li className={`${hovered ? classes.cursorHovered : ""}`}>
+            {props.node.name}
+          </li>
         </div>
         <div className={classes.childDisplay}>
           <MdArrowRightAlt />
