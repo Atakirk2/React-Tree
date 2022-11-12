@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import classes from "./TreeNode.module.css";
 import useKeyPress from "../Hooks/use-keyPress";
 import {
@@ -11,52 +11,41 @@ export default function TreeNode(props) {
   const [isActive, setIsActive] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [selectedChilds, setSelectedChilds] = useState([]);
+  const [hovered, setHovered] = useState(false);
+  const cursor = props.cursor;
   const children = props.node.children;
   const id = props.node.id;
   const setParentSelectedChilds = props.setParentSelectedChilds;
-  const parentSelectedChilds = props.parentSelectedChilds;
   const rootIDs = [1, 10];
-  const [isRoot, setIsRoot] = useState(rootIDs.includes(id) ? true : false);
-  // keyboard traversing part
-  const [cursor, setCursor] = useState(0);
-  const downPress = useKeyPress("ArrowDown");
-  const upPress = useKeyPress("ArrowUp");
-  const [hovered, setHovered] = useState(false);
+  const isRoot = rootIDs.includes(id);
   const enterPress = useKeyPress("Enter");
+  // keyboard traversing part
+  const checkboxRef = useRef();
 
-  useEffect(() => {
-    if (downPress) {
-      console.log(cursor);
-      setCursor((prevState) => (prevState < 13 ? prevState + 1 : prevState));
+  useEffect(()=>{
+    checkIfHovered();
+  },[cursor])
+  
+  useEffect(()=>{
+    if (enterPress && cursor === id) {
+      handleIsActive();
+      console.log('enterpress')
     }
-  }, [downPress]);
-
-  useEffect(() => {
-    if (upPress) {
-      console.log(cursor);
-      setCursor((prevState) => (prevState > 0 ? prevState - 1 : prevState));
-    }
-  }, [upPress]);
-
-  useEffect(() => {
+  },[enterPress])
+  function checkIfHovered(){
+    console.log('if hovered worked')
     if (cursor === id) {
       setHovered(true);
     } else {
       setHovered(false);
     }
-  }, [downPress,upPress]);
-
-  useEffect(() => {
-    if (enterPress && cursor === id) {
-      handleIsActive();
-    }
-  }, [enterPress]);
+  }
 
   function handleIsActive() {
     setIsActive((prev) => !prev);
   }
-  function handleOnChange(e) {
-    setIsSelected(e.target.checked);
+  function handleOnChange() {
+    setIsSelected(checkboxRef.current.checked);
     informParent();
   }
   function informParent() {
@@ -82,6 +71,7 @@ export default function TreeNode(props) {
             name={id}
             checked={isSelected}
             onChange={handleOnChange}
+            ref = {checkboxRef}
           ></input>
         )}
         <div onClick={handleIsActive}>
@@ -108,6 +98,7 @@ export default function TreeNode(props) {
             parentSelectedChilds={selectedChilds}
             node={node}
             key={node.id}
+            cursor = {cursor}
           />
         ))}
     </div>
